@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: ./
+    container_name: app
+    entrypoint: dockerize -wait tcp://postgres:5432 -timeout 60s docker-entrypoint.sh
+    command: ["node", "index.js"]
+    networks:
+      - node-network
+    volumes:
+      - ./:/usr/src/app
+    tty: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: "postgres"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DATABASE: "root"
+    restart: always
+    tty: true
+    volumes:
+      - ./docker:/docker-entrypoint-initdb.d
+    networks:
+      - node-network
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx_node
+    entrypoint: dockerize -wait tcp://app:3000 -timeout 60s
+    command: ["nginx", "-g", "daemon off;"]
+    networks:
+      - node-network
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+
+networks:
+  node-network:
+    driver: bridge
