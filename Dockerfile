@@ -1,16 +1,12 @@
-FROM node:16 as builder
-
-WORKDIR /usr/src/app
-
-RUN apt-get update  && apt-get install -y wget
-
-COPY . .
-
 FROM node:16-alpine
 
 WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app .
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+COPY . .
 
 RUN apk add --no-cache openssl
 

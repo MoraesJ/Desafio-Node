@@ -19,6 +19,7 @@ async function insert() {
   await client.query("INSERT INTO people (id, name) VALUES (2, 'Nome 2')");
   await client.query("INSERT INTO people (id, name) VALUES (3, 'Nome 3')");
   const result = await client.query("SELECT name FROM people");
+  result.rows.forEach((each) => console.log(each.name));
   await client.query("DROP TABLE people");
   client.end();
   return result.rows;
